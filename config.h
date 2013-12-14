@@ -483,7 +483,7 @@
   /******                Serial com speed    *********************************/
     /* This is the speed of the serial interfaces */
     #define SERIAL0_COM_SPEED 115200
-    #define SERIAL1_COM_SPEED 9600
+    #define SERIAL1_COM_SPEED 115200
     #define SERIAL2_COM_SPEED 115200
     #define SERIAL3_COM_SPEED 115200
 
@@ -521,7 +521,7 @@
          IMPORTANT! Change low pass filter setting changes PID behaviour, so retune your PID's after changing LPF.*/
       //#define MPU6050_LPF_256HZ     // This is the default setting, no need to uncomment, just for reference
       //#define MPU6050_LPF_188HZ
-      //#define MPU6050_LPF_98HZ
+      #define MPU6050_LPF_98HZ
       //#define MPU6050_LPF_42HZ
       //#define MPU6050_LPF_20HZ
       //#define MPU6050_LPF_10HZ
