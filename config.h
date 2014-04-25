@@ -64,7 +64,7 @@
   /****************************    Mincommand          *******************************/
     /* this is the value for the ESCs when they are not armed
        in some cases, this value must be lowered down to 900 for some specific ESCs, otherwise they failed to initiate */
-    #define MINCOMMAND  1000
+    #define MINCOMMAND  -1056
 
   /**********************************    I2C speed   ************************************/
     //#define I2C_SPEED 100000L     //100kHz normal mode, this value must be used for a genuine WMP
