@@ -571,9 +571,9 @@
        for best results. This value is depended from your configuration, AUW and some other params.  Next, afrer FAILSAFE_OFF_DELAY the copter is disarmed, 
        and motors is stopped. If RC pulse coming back before reached FAILSAFE_OFF_DELAY time, after the small quard time the RC control is returned to normal. */
     #define FAILSAFE                                // uncomment  to activate the failsafe function
-    #define FAILSAFE_DELAY     15                     // Guard time for failsafe activation after signal lost. 1 step = 0.1sec - 1sec in example
-    #define FAILSAFE_OFF_DELAY 50                    // Time for Landing before motors stop in 0.1sec. 1 step = 0.1sec - 20sec in example
-    #define FAILSAFE_THROTTLE  (MINTHROTTLE + 200)    // (*) Throttle level used for landing - may be relative to MINTHROTTLE - as in this case
+    #define FAILSAFE_DELAY     12                     // Guard time for failsafe activation after signal lost. 1 step = 0.1sec - 1sec in example
+    #define FAILSAFE_OFF_DELAY 40                    // Time for Landing before motors stop in 0.1sec. 1 step = 0.1sec - 20sec in example
+    #define FAILSAFE_THROTTLE  (MINTHROTTLE + 50)    // (*) Throttle level used for landing - may be relative to MINTHROTTLE - as in this case
 
 
   /*****************                DFRobot LED RING    *********************************/
