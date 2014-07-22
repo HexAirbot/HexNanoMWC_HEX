@@ -16,7 +16,7 @@ git clone https://github.com/HexAirbot/HexNanoMWC_HEX.git
 
 ####How to compile 
 - Download the [Arduino IDE](http://arduino.cc/en/main/software#toc2) (you should use the version 1.0.5+).
-- Put all the source files (.ino files) from this repository in a folder called `HexNanoMWC_HES`.
+- Put all the source files (.ino files) from this repository in a folder called `HexNanoMWC_HEX`.
 - Open the main file ([HexNanoMWC_HEX.ino](HexNanoMWC_HEX.ino)) with the Arduino IDE, and the IDE will automatically open the other source files.
 - Connect your Flexbot via USB.
 - Set the Board in your IDE to Arduino Leonardo
