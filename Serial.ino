@@ -67,6 +67,16 @@ const uint32_t PROGMEM capability = 0+BIND_CAPABLE;
 #define MSP_TRIM_DOWN            154
 #define MSP_TRIM_LEFT            155
 #define MSP_TRIM_RIGHT           156
+#define MSP_TRIM_UP_FAST         157
+#define MSP_TRIM_DOWN_FAST       158
+#define MSP_TRIM_LEFT_FAST       159
+#define MSP_TRIM_RIGHT_FAST      160
+
+#define MSP_READ_TEST_PARAM      189
+#define MSP_SET_TEST_PARAM       190
+
+#define MSP_READ_TEST_PARAM      189
+#define MSP_HEX_NANO             199
 #endif
 
 #define MSP_SET_RAW_RC           200   //in message          8 rc chan
@@ -232,6 +242,35 @@ void evaluateCommand() {
      break;
  
    #if defined(HEX_NANO)
+   case MSP_READ_TEST_PARAM:
+     headSerialReply(12);
+     
+     blinkLED(15,20,1);
+    
+     paramList[0] = alpha * 250.f;
+     paramList[1] = conf.P8[PIDALT] * 250.f / 200;
+     paramList[2] = conf.I8[PIDALT];
+     paramList[3] = conf.D8[PIDALT] * 250.f / 100;
+     
+     for(int idx = 0; idx < 12; idx++){
+       serialize8(paramList[idx]);
+     } 
+     
+     break;
+   case MSP_SET_TEST_PARAM:
+     for(int idx = 0; idx < 12; idx++){
+       paramList[idx] = read8();
+     }
+     
+     blinkLED(15,20,1);
+     
+     alpha = paramList[0] / 250.f;
+     conf.P8[PIDALT] = paramList[1] / 250.f * 200;   //0~200
+     conf.I8[PIDALT] = paramList[2];                 //0~250
+     conf.D8[PIDALT] = paramList[3] / 250.f * 100;   //0~100
+     writeParams(0);
+     return;
+     break;
    case MSP_SET_RAW_RC_TINY:
      for(uint8_t i = 0;i < 4;i++) {
        serialRcValue[i] = 1000 + read8() * 4;
@@ -291,9 +330,15 @@ void evaluateCommand() {
      
      failsafeCnt = 0;
      
+          
      return;
      
-     //headSerialReply(0);
+     /*
+     headSerialReply(8);
+     
+     for(uint8_t i = 0; i < 4; i++) {
+       serialize16(serialRcValue[i]);
+     }*/
      break;
    case MSP_ARM:
      go_arm();
@@ -302,33 +347,88 @@ void evaluateCommand() {
      go_disarm();
      break;
    case MSP_TRIM_UP:
-     conf.angleTrim[PITCH]+=4; 
-     writeParams(1);
-     #if defined(LED_RING)
-       blinkLedRing();
-     #endif
+     if(conf.angleTrim[PITCH] < 120){
+       conf.angleTrim[PITCH]+=1;  
+       writeParams(1);
+       #if defined(LED_RING)
+         blinkLedRing();
+       #endif
+     }
      break;
    case MSP_TRIM_DOWN:
-     conf.angleTrim[PITCH]-=4; 
-     writeParams(1);
-     #if defined(LED_RING)
-       blinkLedRing();
-     #endif
-   
+     if(conf.angleTrim[PITCH] > -120){
+       conf.angleTrim[PITCH]-=1; 
+       writeParams(1);
+       #if defined(LED_RING)
+         blinkLedRing();
+       #endif
+     }
      break;
    case MSP_TRIM_LEFT:
-     conf.angleTrim[ROLL]-=4; 
-     writeParams(1);
-     #if defined(LED_RING)
-       blinkLedRing();
-     #endif
+     if(conf.angleTrim[ROLL] > -120){
+       conf.angleTrim[ROLL]-=1; 
+       writeParams(1);
+       #if defined(LED_RING)
+         blinkLedRing();
+       #endif
+     }
      break;
    case MSP_TRIM_RIGHT:
-     conf.angleTrim[ROLL]+=4; 
-     writeParams(1);
-     #if defined(LED_RING)
-       blinkLedRing();
-     #endif
+     if(conf.angleTrim[ROLL] < 120){
+       conf.angleTrim[ROLL]+=1; 
+       writeParams(1);
+       #if defined(LED_RING)
+         blinkLedRing();
+       #endif
+     }
+     break;
+   case MSP_TRIM_UP_FAST:
+     if(conf.angleTrim[PITCH] < 120){
+       conf.angleTrim[PITCH]+=10;  
+       writeParams(1);
+       #if defined(LED_RING)
+         blinkLedRing();
+       #endif
+     }
+     break;
+   case MSP_TRIM_DOWN_FAST:
+     if(conf.angleTrim[PITCH] > -120){
+       conf.angleTrim[PITCH]-=10; 
+       writeParams(1);
+       #if defined(LED_RING)
+         blinkLedRing();
+       #endif
+     }
+     break;
+   case MSP_TRIM_LEFT_FAST:
+     if(conf.angleTrim[ROLL] > -120){
+       conf.angleTrim[ROLL]-=10; 
+       writeParams(1);
+       #if defined(LED_RING)
+         blinkLedRing();
+       #endif
+     }
+     break;
+   case MSP_TRIM_RIGHT_FAST:
+     if(conf.angleTrim[ROLL] < 120){
+       conf.angleTrim[ROLL]+=10; 
+       writeParams(1);
+       #if defined(LED_RING)
+         blinkLedRing();
+       #endif
+     }
+     break;
+   case MSP_HEX_NANO:
+     headSerialReply(14);
+     serialize8(flightState);
+     serialize16(absolutedAccZ);
+     //serialize32(EstAlt);
+     serialize16((int16_t)EstAlt);
+     for(uint8_t i=0;i<2;i++) serialize16(angle[i]);
+     serialize16((int16_t)AltHold);
+     serialize8(vbat);
+     serialize8((int8_t)(conf.angleTrim[PITCH]));
+     serialize8((int8_t)(conf.angleTrim[ROLL]));
      break;
    #endif
    #if GPS
@@ -405,7 +505,7 @@ void evaluateCommand() {
                    f.ANGLE_MODE<<BOXANGLE|
                    f.HORIZON_MODE<<BOXHORIZON|
                  #endif
-                 #if BARO && (!defined(SUPPRESS_BARO_ALTHOLD))
+                 #if HEX_NANO_SONAR && (!defined(SUPPRESS_BARO_ALTHOLD))
                    f.BARO_MODE<<BOXBARO|
                  #endif
                  #if MAG

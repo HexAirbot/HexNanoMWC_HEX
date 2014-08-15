@@ -17,8 +17,13 @@ March  2013     V2.2
 #include <avr/pgmspace.h>
 #define  VERSION  220
 
+
 #if defined(HEX_NANO)
 volatile uint16_t serialRcValue[RC_CHANS] = {1502, 1502, 1502, 1502, 1502, 1502, 1502, 1502}; 
+float alpha = 0.95;
+uint8_t paramList[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int16_t absolutedAccZ = 0;
+uint8_t flightState = 0;
 #endif
 
 /*********** RC alias *****************/
@@ -580,7 +585,7 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
       uint16_t vbatRaw = 0;
       static uint16_t vbatRawArray[8];
       if (! (++vbatTimer % VBATFREQ)) {
-        vbatRawArray[(ind++)%8] = analogRead(V_BATPIN);
+        vbatRawArray[(ind++)%8] = analogRead(A3);
         for (uint8_t i=0;i<8;i++) vbatRaw += vbatRawArray[i];
         vbat = (vbatRaw*2) / conf.vbatscale; // result is Vbatt in 0.1V steps
       }
@@ -1283,7 +1288,7 @@ void loop () {
       static uint8_t isAltHoldChanged = 0;
       #if defined(ALTHOLD_FAST_THROTTLE_CHANGE)
         if (abs(rcCommand[THROTTLE]-initialThrottleHold) > ALT_HOLD_THROTTLE_NEUTRAL_ZONE) {
-          errorAltitudeI = 0;
+         //errorAltitudeI = 0;
           isAltHoldChanged = 1;
           rcCommand[THROTTLE] += (rcCommand[THROTTLE] > initialThrottleHold) ? -ALT_HOLD_THROTTLE_NEUTRAL_ZONE : ALT_HOLD_THROTTLE_NEUTRAL_ZONE;          
          // initialThrottleHold += (rcCommand[THROTTLE] > initialThrottleHold) ? -ALT_HOLD_THROTTLE_NEUTRAL_ZONE : ALT_HOLD_THROTTLE_NEUTRAL_ZONE;; //++hex nano
@@ -1303,7 +1308,7 @@ void loop () {
             AltHold += AltHoldCorr/500;
             AltHoldCorr %= 500;
           }
-          errorAltitudeI = 0;
+          //errorAltitudeI = 0;
           isAltHoldChanged = 1;
         } else if (isAltHoldChanged) {
           AltHold = EstAlt;
