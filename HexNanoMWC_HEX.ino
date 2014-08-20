@@ -18,6 +18,8 @@ March  2013     V2.2
 #define  VERSION  220
 
 
+uint8_t calibration_flag;
+
 #if defined(HEX_NANO)
 volatile uint16_t serialRcValue[RC_CHANS] = {1502, 1502, 1502, 1502, 1502, 1502, 1502, 1502}; 
 float alpha = 0.95;
@@ -699,6 +701,8 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
 }
 
 void setup() {
+  calibration_flag = 0;
+  
   #if !defined(GPS_PROMINI)
     SerialOpen(0,SERIAL0_COM_SPEED);
     #if defined(PROMICRO)
@@ -807,7 +811,19 @@ void setup() {
   debugmsg_append_str("initialization completed\n");
 }
 
+void calibration_fun(void)
+{
+  calibratingG=512;
+#if GPS 
+  GPS_reset_home_position();
+#endif
+#if BARO
+  calibratingB=10;  // calibrate baro to new ground level (10 * 25 ms = ~250 ms non blocking)
+#endif
+}
+
 void go_arm() {
+  
   if(calibratingG == 0 && f.ACC_CALIBRATED 
   #if defined(FAILSAFE)
    // && failsafeCnt < 2
@@ -835,8 +851,14 @@ void go_arm() {
     blinkLED(2,255,1);
     alarmArray[8] = 1;
   }
+
+  if (calibration_flag == 0) {
+    calibration_flag = 1;
+    calibration_fun();
+  }
 }
 void go_disarm() {
+  
   if (f.ARMED) {
     f.ARMED = 0;
     #ifdef LOG_PERMANENT
@@ -971,13 +993,7 @@ void loop () {
       } else {                        // actions during not armed
         i=0;
         if (rcSticks == THR_LO + YAW_LO + PIT_LO + ROL_CE) {    // GYRO calibration
-          calibratingG=512;
-          #if GPS 
-            GPS_reset_home_position();
-          #endif
-          #if BARO
-            calibratingB=10;  // calibrate baro to new ground level (10 * 25 ms = ~250 ms non blocking)
-          #endif
+            calibration_fun();
         }
         #if defined(INFLIGHT_ACC_CALIBRATION)  
          else if (rcSticks == THR_LO + YAW_LO + PIT_HI + ROL_HI) {    // Inflight ACC calibration START/STOP
