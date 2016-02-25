@@ -1714,7 +1714,9 @@ void initSensors() {
   delay(100);
   if (GYRO) Gyro_init();
   if (BARO) Baro_init();
+#if defined(HMC5883)
   if (MAG) Mag_init();
+#endif
   if (ACC) {ACC_init();acc_25deg = acc_1G * 0.423;}
   if (SONAR) Sonar_init();
   f.I2C_INIT_DONE = 1;

@@ -932,7 +932,7 @@ void UartSendData() {
   }
 #endif
 
-static void inline SerialOpen(uint8_t port, uint32_t baud) {
+void SerialOpen(uint8_t port, uint32_t baud) {
   uint8_t h = ((F_CPU  / 4 / baud -1) / 2) >> 8;
   uint8_t l = ((F_CPU  / 4 / baud -1) / 2);
   switch (port) {
